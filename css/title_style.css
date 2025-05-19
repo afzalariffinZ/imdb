@@ -42,3 +42,9 @@ button:hover {
 #title_count {
     color: #ffd700;
 }
+
+
+.space{
+    height: 40px;
+    background: red;
+}

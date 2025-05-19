@@ -1,136 +1,288 @@
-/* Global Styles */
-body.bg-black {
-    background: url('../images/index_background.gif') no-repeat center center fixed;
-    background-size: cover;
-    color: #fff;
+/* css/style.css */
+
+/* --- CSS Variables (Theme Colors) --- */
+:root {
+    /* Dark Theme Defaults */
+    --imdb-bg: #000; /* Base background if GIF fails or for solid areas */
+    --imdb-text: #e0e0e0;
+    --imdb-primary: #800000; /* Your maroon */
+    --imdb-primary-hover: #a00000; /* Lighter maroon for hover */
+    --imdb-secondary: #f5c518; /* Gold/Yellow accent */
+    --imdb-border: #440000; /* Darker border for maroon elements */
+    --imdb-input-bg: #1a1a1a;
+    --imdb-input-border: var(--imdb-primary);
+    --imdb-card-bg: rgba(20, 20, 20, 0.85); /* Semi-transparent card background */
+    --imdb-card-border: #333;
+    --imdb-footer-bg: rgba(10, 10, 10, 0.9);
+    --background-overlay-color: rgba(0, 0, 0, 0.6); /* Dark overlay for readability */
 }
 
-body.bg-light {
-    background: url('../images/index_background.gif') no-repeat center center fixed;
-    background-size: cover;
-    color: #000;
+[data-bs-theme="light"] {
+    --imdb-bg: #fff;
+    --imdb-text: #212529;
+    --imdb-primary: #ff4d4d; /* Your light mode primary */
+    --imdb-primary-hover: #ff6b6b;
+    --imdb-secondary: #b38600; /* Darker gold for light mode contrast */
+    --imdb-border: #cc0000;
+    --imdb-input-bg: #f8f9fa;
+    --imdb-input-border: var(--imdb-primary);
+    --imdb-card-bg: rgba(250, 250, 250, 0.9);
+    --imdb-card-border: #ddd;
+    --imdb-footer-bg: rgba(240, 240, 240, 0.95);
+    --background-overlay-color: rgba(255, 255, 255, 0.3); /* Light overlay */
 }
 
-/* Font for IMDB2 Title */
-.imdb-font {
+/* --- Global Styles --- */
+body {
+    background: url('../images/index_background.gif') no-repeat center center fixed;
+    background-size: cover;
+    color: var(--imdb-text); /* Uses CSS variable */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* A more standard sans-serif */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative; /* For background overlay */
+    transition: color 0.3s ease; /* Smooth text color transition */
+}
+
+/* Overlay to improve readability over animated GIF */
+.background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-overlay-color);
+    z-index: -1; /* Behind content */
+    transition: background-color 0.3s ease;
+}
+
+/* Ensure content is above the overlay */
+.content-wrapper, .imdb-navbar, .imdb-footer {
+    position: relative;
+    z-index: 1;
+}
+
+
+.imdb-font { /* For "IMDb2" brand */
     font-family: 'Impact', 'Arial Black', sans-serif;
     letter-spacing: 1px;
 }
 
-/* --- DARK MODE STYLES --- */
-
-/* Navbar Styling - Dark */
-.bg-maroon {
-    background-color: #800000 !important;
+/* --- Navbar --- */
+.imdb-navbar {
+    background-color: var(--imdb-primary) !important; /* Important to override Bootstrap if needed */
+    border-bottom: 2px solid var(--imdb-border);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.imdb-navbar .navbar-brand,
+.imdb-navbar .nav-link,
+.imdb-navbar .form-check-label {
+    color: #fff !important; /* Always white on maroon/red navbar */
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+.imdb-navbar .navbar-brand:hover {
+    color: var(--imdb-secondary) !important; /* Gold hover for brand */
+}
+.imdb-navbar .nav-link:hover,
+.imdb-navbar .nav-link.active {
+    color: #fff !important;
+    /* background-color: rgba(255,255,255,0.1); subtle hover background */
+    text-decoration: underline;
+    text-decoration-color: var(--imdb-secondary);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
 }
 
-.navbar.bg-maroon .nav-link,
-.navbar.bg-maroon .navbar-brand {
+/* Customizing navbar toggler for better visibility on maroon */
+.navbar-toggler {
+    border-color: rgba(255,255,255,0.4);
+}
+.navbar-toggler-icon { /* SVG for white icon */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* --- Header Content --- */
+.site-logo {
+    max-width: 200px; /* Adjust as needed */
+    height: auto;
+    border-radius: 8px; /* Optional: slightly rounded logo */
+    /* filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); */ /* Shadow if needed */
+}
+.site-title {
+    color: var(--imdb-text);
+    /* text-shadow: 1px 1px 3px rgba(0,0,0,0.7); Add shadow if text is hard to read */
+}
+.site-tagline {
+    color: var(--imdb-text);
+    opacity: 0.85;
+    font-size: 1.1rem;
+}
+
+/* --- Search Section --- */
+#search-input.form-control {
+    background-color: var(--imdb-input-bg);
+    color: var(--imdb-text);
+    border: 2px solid var(--imdb-input-border);
+    border-right: none; /* Seamless with button */
+    box-shadow: none; /* Remove default Bootstrap focus shadow if desired */
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+#search-input.form-control:focus {
+    background-color: var(--imdb-input-bg); /* Keep bg same on focus or slightly change */
+    color: var(--imdb-text);
+    border-color: var(--imdb-secondary); /* Gold focus border */
+    box-shadow: 0 0 0 0.2rem rgba(var(--rgb-imdb-secondary, 245, 197, 24), 0.35); /* Gold focus glow. Define --rgb-imdb-secondary if needed */
+}
+#search-input.form-control::placeholder {
+    color: var(--imdb-text);
+    opacity: 0.6;
+}
+#search-input.is-invalid { /* Custom invalid styling */
+    border-color: #dc3545 !important; /* Bootstrap danger color */
+}
+
+.btn-imdb-primary {
+    background-color: var(--imdb-primary);
+    color: #fff; /* Text always white on this button */
+    border: 2px solid var(--imdb-primary);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.btn-imdb-primary:hover,
+.btn-imdb-primary:focus {
+    background-color: var(--imdb-primary-hover);
+    border-color: var(--imdb-primary-hover);
     color: #fff;
+    box-shadow: 0 0 0 0.2rem rgba(var(--rgb-imdb-primary, 128,0,0), 0.35); /* Define --rgb-imdb-primary if needed */
+}
+.btn-imdb-primary i {
+    margin-right: 0.3rem;
 }
 
-.navbar.bg-maroon .nav-link:hover,
-.navbar.bg-maroon .navbar-brand:hover {
-    background-color: #ff4d4d;
-    color: #c0c0c0;
+/* --- Featured Content Section --- */
+.section-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    color: var(--imdb-text);
+}
+.section-title span {
+    display: inline-block;
+    position: relative;
+    padding: 0 1em;
+    /* background-color: var(--imdb-bg); Solid background if overlay isn't enough */
+    background-color: transparent; /* Let overlay handle this */
+    z-index: 1;
+}
+.section-title::before,
+.section-title::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 35%;
+    height: 1px;
+    background-color: var(--imdb-text);
+    opacity: 0.3;
+    z-index: 0;
+}
+.section-title::before { left: 5%; }
+.section-title::after { right: 5%; }
+
+.content-card {
+    background-color: var(--imdb-card-bg);
+    border: 1px solid var(--imdb-card-border);
+    color: var(--imdb-text); /* Text color for card content */
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    overflow: hidden; /* Ensure rounded corners clip image */
+}
+.content-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+}
+.content-card .card-img-top {
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+}
+.content-card .card-title {
+    color: var(--imdb-text); /* Ensure title stands out */
+    font-weight: 600;
+}
+.content-card .card-text {
+    color: var(--imdb-text);
+    opacity: 0.85;
+    flex-grow: 1; /* Allows button to be pushed to bottom */
 }
 
-/* Button - Dark Mode */
-.btn-maroon {
-    background-color: #800000;
-    color: #fff;
+.btn-imdb-secondary {
+    background-color: transparent;
+    color: var(--imdb-secondary);
+    border: 1px solid var(--imdb-secondary);
+    font-weight: 500;
+    padding: 0.375rem 0.75rem;
 }
-
-.btn-maroon:hover {
-    background-color: #ff4d4d;
-    color: #000;
-}
-
-/* Input - Dark Mode */
-.bg-black .form-control {
-    background-color: #000;
-    color: #fff;
-    border: 2px solid #800000;
+.btn-imdb-secondary:hover {
+    background-color: var(--imdb-secondary);
+    color: var(--imdb-bg); /* Contrasting text color */
+    border-color: var(--imdb-secondary);
 }
 
 
-/* Dropdown & Modal - Dark Mode */
-.bg-black .dropdown-menu,
-.bg-black .modal-content {
-    background-color: #1a1a1a;
-    color: #fff;
-    border: 2px solid #800000;
+/* --- Footer --- */
+.imdb-footer {
+    background-color: var(--imdb-footer-bg);
+    border-top: 1px solid var(--imdb-card-border); /* Use a subtle border */
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+.imdb-footer p {
+    margin-bottom: 0.25rem;
+    color: var(--imdb-text);
+    opacity: 0.7;
+}
+.imdb-footer a {
+    color: var(--imdb-text);
+    opacity: 0.8;
+    text-decoration: none;
+}
+.imdb-footer a:hover {
+    color: var(--imdb-secondary);
+    text-decoration: underline;
 }
 
-.bg-black .dropdown-item {
-    color: #fff;
+
+/* --- Light Mode Specific Overrides (if CSS variables aren't enough) --- */
+/* Most should be handled by data-bs-theme and CSS variables.
+   If Bootstrap components don't pick up your theme colors perfectly,
+   you might need specific overrides like:
+*/
+[data-bs-theme="light"] .btn-close {
+    filter: none; /* Reset filter for light mode close button */
+}
+[data-bs-theme="light"] #search-input.form-control::placeholder {
+    color: #6c757d; /* Default Bootstrap placeholder color for light mode */
 }
 
-.bg-black .dropdown-item:hover {
-    background-color: #333;
-    color: #ff4d4d;
+/* Define RGB versions of your primary colors for RGBA box-shadows for better compatibility if needed */
+/* This is optional if your rgba(var(--your-color), opacity) works across browsers */
+/*
+:root {
+    --rgb-imdb-primary-dark: 128,0,0;
+    --rgb-imdb-secondary-dark: 245,197,24;
+
+    --rgb-imdb-primary-light: 255,77,77;
+    --rgb-imdb-secondary-light: 179,134,0;
 }
 
-/* --- LIGHT MODE STYLES --- */
-
-/* Navbar - Light Mode */
-body.bg-light .navbar {
-    background-color: #ff4d4d !important;
+[data-bs-theme="dark"] {
+    --rgb-imdb-primary: var(--rgb-imdb-primary-dark);
+    --rgb-imdb-secondary: var(--rgb-imdb-secondary-dark);
 }
-
-body.bg-light .navbar .nav-link,
-body.bg-light .navbar .navbar-brand {
-    color: #fff;
+[data-bs-theme="light"] {
+    --rgb-imdb-primary: var(--rgb-imdb-primary-light);
+    --rgb-imdb-secondary: var(--rgb-imdb-secondary-light);
 }
-
-body.bg-light .navbar .nav-link:hover,
-body.bg-light .navbar .navbar-brand:hover {
-    background-color: #800000;
-    color: #fff;
-}
-
-/* Button - Light Mode */
-body.bg-light .btn-maroon {
-    background-color: #ff4d4d;
-    color: #000;
-    border: 2px solid #ff4d4d;
-}
-
-body.bg-light .btn-maroon:hover {
-    background-color: #800000;
-    color: #fff;
-}
-
-/* Input - Light Mode */
-body.bg-light .form-control {
-    background-color: #ffffff;
-    color: #000;
-    border: 2px solid #ff4d4d;
-}
-
-/* Dropdown & Modal - Light Mode */
-body.bg-light .dropdown-menu,
-body.bg-light .modal-content {
-    background-color: #f8f9fa;
-    color: #000;
-    border: 2px solid #ff4d4d;
-}
-
-body.bg-light .dropdown-item {
-    color: #000;
-}
-
-body.bg-light .dropdown-item:hover {
-    background-color: #800000;
-    color: #fff;
-}
-
-/* Modal Borders - Light */
-body.bg-light .modal-header,
-body.bg-light .modal-footer {
-    border-color: #ff4d4d;
-}
-
-.btn-close {
-    filter: invert(1);
-}
+Then use: box-shadow: 0 0 0 0.2rem rgba(var(--rgb-imdb-secondary), 0.35);
+*/
