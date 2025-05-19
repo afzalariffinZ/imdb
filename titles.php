@@ -86,6 +86,20 @@
         </div>
     <?php endif; ?>
 
+    <div class="d-flex justify-content-center my-4">
+    <?php if ($offset > 0): ?>
+        <a href="?title=<?= urlencode($title_str) ?>&offset=<?= max(0, $offset - $limit) ?>&limit=<?= $limit ?>" class="btn btn-secondary me-2">Previous</a>
+    <?php else: ?>
+        <button class="btn btn-secondary me-2" disabled>Previous</button>
+    <?php endif; ?>
+
+    <?php if ($offset + $limit < $count): ?>
+        <a href="?title=<?= urlencode($title_str) ?>&offset=<?= $offset + $limit ?>&limit=<?= $limit ?>" class="btn btn-primary">Next</a>
+    <?php else: ?>
+        <button class="btn btn-primary" disabled>Next</button>
+    <?php endif; ?>
+</div>
+
 </main>
 
 
