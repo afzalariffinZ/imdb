@@ -1,0 +1,293 @@
+/* css/celebs_page_style.css */
+
+/* --- IMDb Celeb Page Theme Variables --- */
+:root {
+    /* Default Dark Mode for Celebs Page (can be overridden by global theme toggle) */
+    --celeb-bg: #121212; /* Dark background */
+    --celeb-text: #e0e0e0;
+    --celeb-primary-red: #cc0000; /* A vibrant IMDb-like red */
+    --celeb-primary-red-hover: #e60000;
+    --celeb-accent-yellow: #f5c518; /* IMDb's signature gold/yellow */
+    --celeb-accent-yellow-hover: #fadc54;
+    --celeb-border: #4d0000; /* Darker red for borders */
+    --celeb-card-bg: rgba(30, 30, 30, 0.9);
+    --celeb-card-border: #444;
+    --celeb-input-bg: #2a2a2a;
+    --celeb-input-border: var(--celeb-primary-red);
+    --celeb-link-color: var(--celeb-accent-yellow);
+    --celeb-link-hover-color: var(--celeb-accent-yellow-hover);
+}
+
+[data-bs-theme="light"] { /* Light Mode for Celebs Page */
+    --celeb-bg: #f4f4f4; /* Light grey background */
+    --celeb-text: #333333;
+    --celeb-primary-red: #d32f2f; /* Slightly muted red for light bg */
+    --celeb-primary-red-hover: #e53935;
+    --celeb-accent-yellow: #fbc02d; /* Slightly adjusted yellow */
+    --celeb-accent-yellow-hover: #fdd835;
+    --celeb-border: #b71c1c;
+    --celeb-card-bg: rgba(255, 255, 255, 0.95);
+    --celeb-card-border: #e0e0e0;
+    --celeb-input-bg: #ffffff;
+    --celeb-input-border: var(--celeb-primary-red);
+    --celeb-link-color: var(--celeb-primary-red); /* Red links on light bg */
+    --celeb-link-hover-color: var(--celeb-primary-red-hover);
+}
+
+/* Apply theme to the body if this page should always have this theme,
+   or ensure your global theme toggle correctly sets these variables.
+   For now, we assume the global theme toggle is active and these are overrides. */
+
+body { /* Assuming global styles handle animated background/overlay */
+    color: var(--celeb-text);
+}
+
+/* --- Celebs Page Specific Container --- */
+.celebs-page-container {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+}
+
+/* --- Page Header --- */
+.page-title-celebs { /* Specific class for celeb page title */
+    color: var(--celeb-text);
+    font-weight: 700; /* Bolder for celeb page */
+    margin-bottom: 1.5rem;
+    text-align: center;
+    /* border-bottom: 2px solid var(--celeb-accent-yellow); */ /* Yellow underline */
+    padding-bottom: 0.5rem;
+    font-size: 2rem;
+}
+.page-title-celebs strong {
+    color: var(--celeb-accent-yellow); /* Yellow for count or search term */
+}
+
+/* --- Search Bar Area --- */
+.search-controls-celebs { /* Specific class */
+    background-color: var(--celeb-card-bg);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid var(--celeb-card-border);
+}
+.search-controls-celebs .form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--celeb-text);
+}
+.search-controls-celebs .input-group .form-control {
+    background-color: var(--celeb-input-bg);
+    color: var(--celeb-text);
+    border: 1px solid var(--celeb-input-border); /* Red border */
+    border-right: none;
+    box-shadow: none;
+}
+.search-controls-celebs .input-group .form-control:focus {
+    border-color: var(--celeb-accent-yellow); /* Yellow focus */
+    background-color: var(--celeb-input-bg);
+    box-shadow: 0 0 0 0.2rem rgba(var(--rgb-celeb-accent-yellow, 245,197,24), 0.25);
+}
+.search-controls-celebs .input-group .btn-celeb-search { /* Specific button class */
+    background-color: var(--celeb-primary-red);
+    border-color: var(--celeb-primary-red);
+    color: #fff;
+}
+.search-controls-celebs .input-group .btn-celeb-search:hover {
+    background-color: var(--celeb-primary-red-hover);
+    border-color: var(--celeb-primary-red-hover);
+}
+
+/* --- Celebs Grid --- */
+.celebs-grid .celeb-card-link { /* Specific class */
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    border-radius: 0.375rem; /* Match card's border-radius */
+}
+.celebs-grid .celeb-card-link:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+.celebs-grid .celeb-card-link:hover .card {
+    border-color: var(--celeb-accent-yellow); /* Yellow highlight on hover */
+}
+.celebs-grid .card {
+    background-color: var(--celeb-card-bg);
+    border: 1px solid var(--celeb-card-border);
+    color: var(--celeb-text);
+    height: 100%;
+    transition: border-color 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+    text-align: center; /* Center content in celeb card */
+}
+.celebs-grid .celeb-card-img-wrapper { /* Wrapper for consistent image height */
+    width: 100%;
+    padding-top: 100%; /* Creates a square aspect ratio for the wrapper */
+    position: relative;
+    overflow: hidden; /* Clip image to border radius */
+    border-top-left-radius: calc(0.375rem - 1px);
+    border-top-right-radius: calc(0.375rem - 1px);
+}
+.celebs-grid .card-img-top.celeb-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Cover the square area */
+    object-position: top center; /* Focus on the top part of the image (usually face) */
+}
+.celebs-grid .card-body {
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.celebs-grid .card-title.celeb-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    color: var(--celeb-text);
+}
+.celebs-grid .celeb-professions {
+    font-size: 0.8rem;
+    color: var(--celeb-text);
+    opacity: 0.7;
+    margin-bottom: 0;
+    flex-grow: 1; /* Pushes knownFor to bottom if present */
+}
+.celebs-grid .celeb-known-for {
+    font-size: 0.75rem;
+    color: var(--celeb-text);
+    opacity: 0.6;
+    margin-top: 0.5rem; /* Pushed to bottom */
+    font-style: italic;
+}
+
+
+/* --- Single Celeb Detail View --- */
+.celeb-detail-container { /* Specific class */
+    background-color: var(--celeb-card-bg);
+    padding: 1.5rem 2rem;
+    border-radius: 0.5rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 1px solid var(--celeb-card-border);
+}
+.celeb-detail-header {
+    display: flex;
+    align-items: flex-start; /* Align items to the top */
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--celeb-card-border);
+}
+.celeb-detail-image-wrapper {
+    flex-shrink: 0; /* Prevent image from shrinking */
+    width: 150px; /* Adjust as needed */
+    height: 225px; /* Adjust for portrait aspect ratio */
+    margin-right: 1.5rem;
+    overflow: hidden;
+    border-radius: 0.375rem;
+    border: 2px solid var(--celeb-border);
+}
+.celeb-detail-image-wrapper img.celeb-profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+}
+.celeb-detail-name-prof h1.celeb-name {
+    color: var(--celeb-accent-yellow); /* Yellow for name */
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    font-size: 2.2rem;
+}
+.celeb-detail-name-prof p.celeb-professions-detail {
+    font-size: 1rem;
+    color: var(--celeb-text);
+    opacity: 0.8;
+    margin-bottom: 0.5rem;
+}
+.celeb-detail-bio h4, .celeb-detail-filmography h4 {
+    font-size: 1.3rem;
+    color: var(--celeb-text);
+    border-bottom: 1px solid var(--celeb-card-border);
+    padding-bottom: 0.4rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+.celeb-detail-bio p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--celeb-text);
+    opacity: 0.9;
+}
+.celeb-detail-filmography ul {
+    list-style: none;
+    padding-left: 0;
+}
+.celeb-detail-filmography li {
+    padding: 0.4rem 0;
+    border-bottom: 1px dashed rgba(var(--rgb-celeb-card-border, 68,68,68), 0.3); /* Define rgb variable */
+}
+.celeb-detail-filmography li:last-child {
+    border-bottom: none;
+}
+.celeb-detail-filmography li a {
+    color: var(--celeb-link-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+.celeb-detail-filmography li a:hover {
+    color: var(--celeb-link-hover-color);
+    text-decoration: underline;
+}
+.celeb-detail-filmography li .film-year {
+    font-size: 0.85em;
+    color: var(--celeb-text);
+    opacity: 0.7;
+    margin-left: 0.5em;
+}
+.celeb-detail-filmography li .film-role {
+    display: block;
+    font-size: 0.8em;
+    color: var(--celeb-text);
+    opacity: 0.6;
+    margin-left: 1em;
+    font-style: italic;
+}
+
+
+/* --- Pagination Controls (reusable, but can be themed) --- */
+.pagination-controls .btn-primary { /* Celeb theme primary button */
+    background-color: var(--celeb-primary-red);
+    border-color: var(--celeb-primary-red);
+    color: #fff;
+}
+.pagination-controls .btn-primary:hover {
+    background-color: var(--celeb-primary-red-hover);
+    border-color: var(--celeb-primary-red-hover);
+}
+.pagination-controls .btn-secondary {
+    background-color: var(--celeb-input-bg);
+    border-color: var(--celeb-input-border);
+    color: var(--celeb-text);
+}
+.pagination-controls .btn-secondary:hover {
+    background-color: var(--celeb-card-border);
+    border-color: var(--celeb-card-border);
+}
+/* General pagination styles from titles_page_style.css can be reused if structure is same */
+.pagination-controls { margin-top: 2rem; margin-bottom: 1rem; }
+.pagination-controls .btn { font-weight: 500; padding: 0.5rem 1.25rem; }
+.pagination-controls .btn:disabled { opacity: 0.5; }
+
+/* Ensure content is above the background overlay */
+main.container.celebs-page-container {
+    position: relative;
+    z-index: 1;
+}

@@ -43,10 +43,10 @@ $titles_list = []; // For list view
 $count = 0; // For list view
 
 if ($id) {
-    $title_obj = getTitle($id); // Assumes getTitle returns a single title object or null
+    $title_obj = getMovie($id); // Assumes getTitle returns a single title object or null
 } else {
-    $count = getTitleCount($title_str);
-    $titles_list = getTitles($offset, $limit, $title_str);
+    $count = getMoviesCount($title_str);
+    $titles_list = getMovies($offset, $limit, $title_str);
 }
 ?>
 
@@ -58,7 +58,7 @@ if ($id) {
             <?php if (!empty($title_str)): ?>
                 Results for "<strong><?= htmlspecialchars($title_str) ?></strong>" (<?= $count ?> found)
             <?php else: ?>
-                Browse Titles (<?= $count ?> total)
+                Browse Movies (<?= $count ?> total)
             <?php endif; ?>
         </h1>
 
