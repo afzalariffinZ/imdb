@@ -1,0 +1,136 @@
+/* Global Styles */
+body.bg-black {
+    background: url('../images/index_background.gif') no-repeat center center fixed;
+    background-size: cover;
+    color: #fff;
+}
+
+body.bg-light {
+    background: url('../images/index_background.gif') no-repeat center center fixed;
+    background-size: cover;
+    color: #000;
+}
+
+/* Font for IMDB2 Title */
+.imdb-font {
+    font-family: 'Impact', 'Arial Black', sans-serif;
+    letter-spacing: 1px;
+}
+
+/* --- DARK MODE STYLES --- */
+
+/* Navbar Styling - Dark */
+.bg-maroon {
+    background-color: #800000 !important;
+}
+
+.navbar.bg-maroon .nav-link,
+.navbar.bg-maroon .navbar-brand {
+    color: #fff;
+}
+
+.navbar.bg-maroon .nav-link:hover,
+.navbar.bg-maroon .navbar-brand:hover {
+    background-color: #ff4d4d;
+    color: #c0c0c0;
+}
+
+/* Button - Dark Mode */
+.btn-maroon {
+    background-color: #800000;
+    color: #fff;
+}
+
+.btn-maroon:hover {
+    background-color: #ff4d4d;
+    color: #000;
+}
+
+/* Input - Dark Mode */
+.bg-black .form-control {
+    background-color: #000;
+    color: #fff;
+    border: 2px solid #800000;
+}
+
+
+/* Dropdown & Modal - Dark Mode */
+.bg-black .dropdown-menu,
+.bg-black .modal-content {
+    background-color: #1a1a1a;
+    color: #fff;
+    border: 2px solid #800000;
+}
+
+.bg-black .dropdown-item {
+    color: #fff;
+}
+
+.bg-black .dropdown-item:hover {
+    background-color: #333;
+    color: #ff4d4d;
+}
+
+/* --- LIGHT MODE STYLES --- */
+
+/* Navbar - Light Mode */
+body.bg-light .navbar {
+    background-color: #ff4d4d !important;
+}
+
+body.bg-light .navbar .nav-link,
+body.bg-light .navbar .navbar-brand {
+    color: #fff;
+}
+
+body.bg-light .navbar .nav-link:hover,
+body.bg-light .navbar .navbar-brand:hover {
+    background-color: #800000;
+    color: #fff;
+}
+
+/* Button - Light Mode */
+body.bg-light .btn-maroon {
+    background-color: #ff4d4d;
+    color: #000;
+    border: 2px solid #ff4d4d;
+}
+
+body.bg-light .btn-maroon:hover {
+    background-color: #800000;
+    color: #fff;
+}
+
+/* Input - Light Mode */
+body.bg-light .form-control {
+    background-color: #ffffff;
+    color: #000;
+    border: 2px solid #ff4d4d;
+}
+
+/* Dropdown & Modal - Light Mode */
+body.bg-light .dropdown-menu,
+body.bg-light .modal-content {
+    background-color: #f8f9fa;
+    color: #000;
+    border: 2px solid #ff4d4d;
+}
+
+body.bg-light .dropdown-item {
+    color: #000;
+}
+
+body.bg-light .dropdown-item:hover {
+    background-color: #800000;
+    color: #fff;
+}
+
+/* Modal Borders - Light */
+body.bg-light .modal-header,
+body.bg-light .modal-footer {
+    border-color: #ff4d4d;
+}
+
+.btn-close {
+    filter: invert(1);
+}

@@ -1,0 +1,44 @@
+/* Set the main background to dark maroon */
+body {
+    background-color: #800000; /* Dark Maroon */
+    color: white; /* Makes text readable */
+}
+
+/* Container styling */
+main.container {
+    background-color: transparent;
+}
+
+/* Search input styling */
+#title-input {
+    background-color: #4d0f0f;
+    color: white;
+    border-color: #800000;
+}
+
+/* Card styling */
+.card {
+    background-color: #4d0f0f;
+    color: white;
+    border: 1px solid #660000;
+}
+
+.card:hover {
+    background-color: #660000;
+}
+
+/* Buttons (if any) */
+button {
+    background-color: #800000;
+    color: white;
+    border: none;
+}
+
+button:hover {
+    background-color: #660000;
+}
+
+/* Title Count */
+#title_count {
+    color: #ffd700;
+}
