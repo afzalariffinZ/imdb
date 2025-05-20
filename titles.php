@@ -20,7 +20,6 @@
 </head>
 <body>
 <div class="background-overlay"></div> <!-- For animated background consistency -->
-
 <!-- Navigation Bar -->
 <?php
 include_once 'navigation.php'; // Make sure navigation.php also respects data-bs-theme

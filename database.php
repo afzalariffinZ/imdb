@@ -492,7 +492,7 @@ function getShortsCount($title)
 }
 
 
-require_once './Name.php'; // Create this Name class
+require_once './objects/Name.php'; // Create this Name class
 
 /**
  * Fetches a list of names (celebrities) with pagination and optional search.
