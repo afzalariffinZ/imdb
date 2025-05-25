@@ -43,9 +43,19 @@ $count = 0; // For list view
 
 if ($id) {
     $title_obj = getMovie($id); // Assumes getTitle returns a single title object or null
+    // var_dump($title_obj);
 } else {
     $count = getMoviesCount($title_str);
     $titles_list = getMovies($offset, $limit, $title_str);
+
+    // if (empty($id)) { // Only print if we are in list view
+    //     echo '<div class="container my-3"><pre class="bg-secondary text-white p-3 rounded">';
+    //     echo "<strong>Debugging getMovies() output (\$titles_list):</strong>\n";
+    //     echo "Number of items in \$titles_list: " . count($titles_list) . "\n\n";
+    //     var_dump($title_obj);
+    //     var_dump($titles_list);
+    //     echo '</pre></div>';
+    // }
 }
 ?>
 
@@ -126,7 +136,7 @@ if ($id) {
                 //    <div class="col-md-4 title-detail-poster"><img src="..."></div>
                 //    <div class="col-md-8 title-detail-info"><h4>Plot</h4><p>...</p>...</div>
                 // </div>
-                echo $title_obj->toHtml(); // You might need to adapt this method
+                echo $title_obj->toDetailedHtml(); // You might need to adapt this method
                 ?>
             </div>
         </div>
