@@ -1,70 +1,109 @@
 <?php
 // api_all.php
 
-// Set headers for JSON output and CORS (if needed for development)
+ob_start(); // Start output buffering for better error/header control
 
-header('Access-Control-Allow-Origin: http://localhost:5173'); // YOUR REACT DEV SERVER URL
-header('Access-Control-Allow-Methods: GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+// CORS Headers - Adjust http://localhost:5173 to your React app's actual origin
+header("Access-Control-Allow-Origin: http://localhost:5173"); // Be specific in production
+header("Access-Control-Allow-Credentials: true"); // If you use cookies/sessions
+header("Access-Control-Allow-Methods: GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
+// Handle OPTIONS pre-flight request
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    exit(0); // Handle preflight CORS request
+    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'])) {
+        // Fine, headers are already set
+    }
+    exit(0);
 }
-header('Content-Type: application/json');
 
-// Include your database functions and classes
-// Adjust the path if api_movies.php is not in the same directory as database.php
-require_once __DIR__ . '/database.php'; // This should include connection.php and Title.php
+header('Content-Type: application/json; charset=UTF-8');
+
+require_once __DIR__ . '/database.php';
 
 // Default values for pagination and search
 $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
-$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 8; // Default limit matches your React page
-$searchTerm = $_GET['search'] ?? $_GET['title'] ?? ""; // Allow 'search' or 'title' as query param for search term
+$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 8;
+$searchTerm = $_GET['search'] ?? $_GET['title'] ?? "";
 
-// Validate limit to prevent excessively large requests
-if ($limit > 50) {
-    $limit = 50; // Max limit
-}
-if ($limit < 1) {
-    $limit = 1;
-}
-if ($offset < 0) {
-    $offset = 0;
-}
+// Filter parameters from GET request
+$minRating = $_GET['minRating'] ?? null;
+$maxRating = $_GET['maxRating'] ?? null;
+$genres_str = $_GET['genres'] ?? null;          // Comma-separated string
+$startYearFrom = $_GET['startYearFrom'] ?? null;  // For title's startYear
+$startYearTo = $_GET['startYearTo'] ?? null;    // For title's startYear
+$isAdult = $_GET['isAdult'] ?? null;            // '0' or '1'
+$titleTypes_str = $_GET['titleTypes'] ?? null;  // Comma-separated string e.g. "movie,tvSeries"
+
+// Validate limit and offset
+if ($limit > 50) $limit = 50;
+if ($limit < 1) $limit = 1;
+if ($offset < 0) $offset = 0;
 
 $response = [
-    'movies' => [],
+    'items' => [], // Changed from 'movies' to 'items' for generic "all" endpoint
     'totalCount' => 0,
     'error' => null,
+    'filters' => [], // To reflect applied filters
 ];
+$httpStatusCode = 200;
 
 try {
-    // Get total count of movies matching the search term (for pagination)
-    // Assuming getMoviesCount expects the search term as its parameter
-    $totalCount = getAllCounts($searchTerm);
+    $response['filters'] = [
+        'search' => $searchTerm,
+        'minRating' => $minRating,
+        'maxRating' => $maxRating,
+        'genres' => $genres_str,
+        'startYearFrom' => $startYearFrom,
+        'startYearTo' => $startYearTo,
+        'isAdult' => $isAdult,
+        'titleTypes' => $titleTypes_str,
+        'offset' => $offset,
+        'limit' => $limit,
+    ];
+
+    $totalCount = getAllCounts(
+        $searchTerm,
+        $minRating,
+        $maxRating,
+        $genres_str,
+        $startYearFrom,
+        $startYearTo,
+        $isAdult,
+        $titleTypes_str
+    );
     $response['totalCount'] = (int)$totalCount;
 
-    $moviesList = [];
+    $itemsList = [];
     if ($totalCount > 0 && $offset < $totalCount) {
-        // Fetch the paginated list of movies
-        // Pass $searchTerm to your getMovies function
-        $moviesList = getAll($offset, $limit, $searchTerm);
+        $itemsList = getAll(
+            $offset,
+            $limit,
+            $searchTerm,
+            $minRating,
+            $maxRating,
+            $genres_str,
+            $startYearFrom,
+            $startYearTo,
+            $isAdult,
+            $titleTypes_str
+        );
     }
     
-    // The $moviesList from getMovies already contains Title objects.
-    // Title objects implement JsonSerializable, so they will be correctly converted.
-    $response['movies'] = $moviesList;
+    $response['items'] = $itemsList;
 
 } catch (PDOException $e) {
-    error_log("API PDOException: " . $e->getMessage());
-    http_response_code(500); // Internal Server Error
+    $httpStatusCode = 500;
     $response['error'] = "A database error occurred: " . $e->getMessage();
-} catch (Throwable $th) {
-    error_log("API Throwable: " . $th->getMessage());
-    http_response_code(500); // Internal Server Error
+    error_log("API All (PDOException): " . $e->getMessage());
+} catch (Throwable $th) { // Changed to Throwable to catch more error types
+    $httpStatusCode = 500;
     $response['error'] = "An unexpected error occurred: " . $th->getMessage();
+    error_log("API All (Throwable): " . $th->getMessage());
 }
 
-// Send the JSON response
-echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+ob_end_clean(); // Clean buffer before sending response
 
+http_response_code($httpStatusCode);
+echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 ?>
