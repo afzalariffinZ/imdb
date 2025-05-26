@@ -1,135 +1,159 @@
 <?php
+// objects/Name.php
+#[\AllowDynamicProperties]
+class Name implements JsonSerializable {
+    public $nconst;
+    public $primaryName;
+    public ?int $birthYear = null;     // Explicitly nullable int
+    public ?int $deathYear = null;     // Explicitly nullable int
+    public ?string $primaryProfession = null; // Raw pconsts string
+    public ?string $imageUrl = null;      // Stored image URL
 
-class Name {
-    public string $nconst;
-    public string $primaryName;
-    public ?int $birthYear = null;     // Can be NULL in the database
-    public ?int $deathYear = null;     // Can be NULL
-    public ?string $primaryProfession = null; // Comma-separated string, can be NULL
-    public ?string $knownForTitles = null;   // Comma-separated tconsts, can be NULL
-    public ?string $image_url = null;     // This column you would add manually after scraping
+    public ?array $resolvedProfessions = []; // Array of actual profession strings
+    public ?array $titlesAssociated = [];    // Array of associated title objects/data
+    // public ?string $professionsText = null; // Alternative if setProfessionsData stores a string
 
-    // Constructor can be empty if using FETCH_PROPS_LATE with fetchAll/fetchObject
+    private static ?PDO $db_connection = null;
+
     public function __construct() {
-        // PDO::FETCH_PROPS_LATE means properties are assigned *after* constructor runs.
-        // If you need to initialize based on these, you'd do it here,
-        // but usually it's fine for simple data objects.
+        $this->resolvedProfessions = [];
+        $this->titlesAssociated = [];
     }
 
-    // --- Getters ---
-    public function getNconst(): string { return $this->nconst; }
-    public function getPrimaryName(): string { return $this->primaryName; }
-
-    public function getBirthYear(): ?int {
-        // The database might store \N as NULL, which PDO often converts to null.
-        // Or it might be an empty string if not properly cleaned.
-        // Casting to int handles '1899' correctly.
-        // If it's truly NULL from DB, $this->birthYear will be null.
-        return $this->birthYear ? (int)$this->birthYear : null;
-    }
-
-    public function getDeathYear(): ?int {
-        return $this->deathYear ? (int)$this->deathYear : null;
-    }
-
-    public function getPrimaryProfessionsArray(): array {
-        if (empty($this->primaryProfession) || $this->primaryProfession === '\N') {
-            return [];
-        }
-        // Capitalize first letter of each profession for display
-        return array_map('ucfirst', explode(',', $this->primaryProfession));
-    }
-
-    public function getKnownForTitlesTconstArray(): array {
-        if (empty($this->knownForTitles) || $this->knownForTitles === '\N') {
-            return [];
-        }
-        return explode(',', $this->knownForTitles);
-    }
-
-    public function getImageUrl(): string { // Always return a string (placeholder if null)
-        return $this->image_url ?: 'https://via.placeholder.com/150x225.png?text=No+Image';
-    }
-
-    // --- HTML Rendering Methods (Examples - adapt to your desired card/detail HTML) ---
-
-    /**
-     * Generates HTML for a celebrity card in a list view.
-     */
-    public function toHtmlCard(): string {
-        $name = htmlspecialchars($this->getPrimaryName());
-        $imageUrl = $this->getImageUrl(); // Already handles placeholder
-        $professions = htmlspecialchars(implode(', ', array_slice($this->getPrimaryProfessionsArray(), 0, 2))); // Show first 2
-
-        $html = '<div class="celeb-card-img-wrapper">';
-        $html .= '<img src="' . $imageUrl . '" class="card-img-top celeb-image" alt="' . $name . '">';
-        $html .= '</div>';
-        $html .= '<div class="card-body">';
-        $html .= '<h5 class="card-title celeb-name" title="' . $name . '">' . $name . '</h5>';
-        if (!empty($professions)) {
-            $html .= '<p class="celeb-professions">' . $professions . '</p>';
-        }
-        // Optionally show a snippet of known for titles
-        /*
-        $knownForTconsts = $this->getKnownForTitlesTconstArray();
-        if (!empty($knownForTconsts)) {
-            // In a real app, you'd fetch the title names for these tconsts
-            // For simplicity here, we just show the count or first few IDs
-            $html .= '<p class="celeb-known-for small text-muted">Known for ' . count($knownForTconsts) . ' titles</p>';
-        }
-        */
-        $html .= '</div>';
-        return $html;
-    }
-
-    /**
-     * Generates HTML for the detailed view of a celebrity.
-     * This would be more extensive and likely involve fetching related data (filmography details).
-     */
-    public function toHtmlDetail(): string {
-        $name = htmlspecialchars($this->getPrimaryName());
-        $imageUrl = $this->getImageUrl();
-        $professions = htmlspecialchars(implode(', ', $this->getPrimaryProfessionsArray()));
-        $birthYear = $this->getBirthYear() ?: 'N/A';
-        $deathYearHtml = $this->getDeathYear() ? ' | Died: ' . $this->getDeathYear() : '';
-
-        $html = '<div class="celeb-detail-header">';
-        $html .= '<div class="celeb-detail-image-wrapper">';
-        $html .= '<img src="' . $imageUrl . '" class="celeb-profile-img" alt="Profile image of ' . $name . '">';
-        $html .= '</div>';
-        $html .= '<div class="celeb-detail-name-prof">';
-        $html .= '<h1 class="celeb-name">' . $name . '</h1>';
-        if (!empty($professions)) {
-            $html .= '<p class="celeb-professions-detail">' . $professions . '</p>';
-        }
-        $html .= '<p class="small text-muted">Born: ' . $birthYear . $deathYearHtml . '</p>';
-        $html .= '</div></div>'; // End celeb-detail-name-prof and celeb-detail-header
-
-        // Placeholder for Biography and Filmography
-        // $html .= '<div class="celeb-detail-bio"><h4>Biography</h4><p>Biography details would go here if available...</p></div>';
-
-        $html .= '<div class="celeb-detail-filmography"><h4>Known For</h4>';
-        $known_for_tconsts = $this->getKnownForTitlesTconstArray();
-        if (!empty($known_for_tconsts)) {
-            $html .= "<ul>";
-            // Fetching full title details here for each knownFor can be slow.
-            // Consider just listing tconsts or pre-fetching a limited number of title names.
-            // For this example, we'll just list the first few tconsts.
-            // In a real app, you'd link to your titles.php page.
-            foreach (array_slice($known_for_tconsts, 0, 5) as $tconst) { // Show up to 5
-                 // Ideally, fetch the title name for $tconst
-                 // $title_obj = getTitleById($tconst); // This could be slow in a loop
-                 // $title_name = $title_obj ? htmlspecialchars($title_obj->getPrimaryTitle()) : htmlspecialchars($tconst);
-                $title_name = htmlspecialchars($tconst); // Placeholder
-                $html .= '<li><a href="titles.php?id=' . htmlspecialchars($tconst) . '">' . $title_name . '</a></li>';
+    private static function getDb(): ?PDO { // Return type also nullable
+        if (self::$db_connection === null) {
+            if (!function_exists('openConnection')) {
+                $dbFile = __DIR__ . '/../database.php'; // Adjust path
+                if (file_exists($dbFile)) { require_once $dbFile; }
+                else { error_log("Name class: openConnection() not found and database.php include failed."); return null; }
             }
-            if(count($known_for_tconsts) > 5) $html .= "<li>...and more.</li>";
-            $html .= "</ul>";
-        } else {
-            $html .= "<p>No specific filmography information available directly from this record.</p>";
+            try {
+                 self::$db_connection = openConnection();
+            } catch (PDOException $e) {
+                error_log("Name class: Failed to get DB connection: " . $e->getMessage());
+                return null;
+            }
         }
-        $html .= '</div>'; // End celeb-detail-filmography
-
-        return $html;
+        return self::$db_connection;
     }
+
+    public function getImageUrl(): ?string { // Return type also nullable
+        if (!empty($this->imageUrl)) {
+            return $this->imageUrl;
+        }
+        if (!empty($this->nconst)) {
+            if (!class_exists('PersonImageScraper')) {
+                $scraperFile = __DIR__ . '/../PersonImageScraper.php'; // Adjust path
+                if (file_exists($scraperFile)) { require_once $scraperFile; }
+                else { error_log("Name::getImageUrl - PersonImageScraper class not found."); return null; }
+            }
+
+            $db = self::getDb();
+            if ($db && class_exists('PersonImageScraper')) {
+                $fetchedUrl = PersonImageScraper::fetchAndSavePersonImageUrl($this->nconst, $db);
+                if ($fetchedUrl) {
+                    $this->imageUrl = $fetchedUrl;
+                    return $this->imageUrl;
+                }
+            }
+        }
+        return null;
+    }
+
+    // For use with the CTE version of getNamesList that returns GROUP_CONCAT
+    public function setProfessionsData(?string $commaSeparatedProfessions) {
+        if ($commaSeparatedProfessions) {
+            $this->resolvedProfessions = explode(',', $commaSeparatedProfessions);
+        } else {
+            $this->resolvedProfessions = [];
+        }
+    }
+
+    // For use with the CTE version of getNamesList that returns JSON string
+    public function setTitlesData(?string $jsonString) {
+        if ($jsonString) {
+            $decoded = json_decode($jsonString, true);
+            $this->titlesAssociated = is_array($decoded) ? $decoded : [];
+        } else {
+            $this->titlesAssociated = [];
+        }
+    }
+    
+    // This is the method that had the deprecated parameter definition
+    // In objects/Name.php
+    public function resolveProfessions(?PDO $db = null): void { // $db parameter is no longer strictly needed for this logic
+        $this->resolvedProfessions = []; // Default to empty
+
+        if ($this->primaryProfession === null || trim($this->primaryProfession) === '' || $this->primaryProfession === '\N') {
+            // error_log("Name::resolveProfessions - nconst {$this->nconst}: primaryProfession is null, empty, or '\\N'. Setting empty resolvedProfessions.");
+            return; // No professions to resolve
+        }
+
+        // The primaryProfession field directly contains comma-separated profession names
+        $professionsArray = array_filter(array_map('trim', explode(',', $this->primaryProfession)), function($value) {
+            return $value !== '' && $value !== '\N';
+        });
+
+        $this->resolvedProfessions = $professionsArray;
+        // error_log("Name::resolveProfessions - nconst {$this->nconst}: Resolved professions directly from string: " . implode(', ', $this->resolvedProfessions));
+    }
+    
+    // This is the other method that had the deprecated parameter definition
+    public function fetchAssociatedTitles(?PDO $db = null, int $limit = 3): void { // Explicitly nullable PDO
+        if (empty($this->nconst)) {
+            $this->titlesAssociated = [];
+            return;
+        }
+        $dbToUse = $db ?? self::getDb();
+        if (!$dbToUse) {
+            error_log("Name::fetchAssociatedTitles - No DB connection for nconst {$this->nconst}");
+            $this->titlesAssociated = []; // Ensure it's an array on failure
+            return;
+        }
+
+        $sql = "SELECT tb.tconst, tb.primaryTitle, tb.startYear, tb.titleType
+                FROM known_for_titles_trim kft
+                JOIN title_basics_trim tb ON kft.tconst = tb.tconst
+                LEFT JOIN title_ratings_trim tr ON tb.tconst = tr.tconst /* Assuming title_ratings_trim */
+                WHERE kft.nconst = :nconst
+                ORDER BY tb.startYear DESC, IFNULL(tr.numVotes, 0) DESC 
+                LIMIT :limit";
+        try {
+            $stmt = $dbToUse->prepare($sql);
+            $stmt->bindParam(':nconst', $this->nconst, PDO::PARAM_STR);
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            $this->titlesAssociated = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (PDOException $e) {
+            error_log("Name::fetchAssociatedTitles - Error for nconst {$this->nconst}: " . $e->getMessage());
+            $this->titlesAssociated = [];
+        }
+    }
+
+    public function jsonSerialize(): mixed {
+        // Attempt to fetch image if not set
+        if ($this->imageUrl === null && !empty($this->nconst)) {
+            $this->getImageUrl();
+        }
+        // If using the CTE version of getNamesList, professionsData and titlesData are set directly.
+        // If not, you might call resolveProfessions and fetchAssociatedTitles here.
+        // For now, assuming getNamesList's loop calls the setters.
+
+        return [
+            'nconst' => $this->nconst,
+            'primaryName' => $this->primaryName,
+            'birthYear' => $this->birthYear,
+            'deathYear' => $this->deathYear,
+            'imageUrl' => $this->imageUrl, // This will be null if not found/fetched
+            // 'rawPconsts' => $this->primaryProfession, // Optionally send raw data
+            'professions' => $this->resolvedProfessions, // Populated by setProfessionsData or resolveProfessions
+            'titlesAssociated' => $this->titlesAssociated, // Populated by setTitlesData or fetchAssociatedTitles
+        ];
+    }
+
+    // --- Optional: Getters for direct access if needed ---
+    public function getNconst() { return $this->nconst; }
+    public function getPrimaryName() { return $this->primaryName; }
+    // ... etc.
 }
+?>

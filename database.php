@@ -56,8 +56,8 @@ function openConnection(): PDO
             CONNECTION_USER,     // Usually null for SQLite
             CONNECTION_PASSWORD, // Usually null for SQLite
             CONNECTION_OPTIONS   // Should include PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-        );
-
+        ); // Wait up to 5000ms (5 seconds)
+        
         // If connection is successful, and it's SQLite, let's confirm the attached DB path
         // if (stripos(CONNECTION_STRING, 'sqlite:') === 0) {
         //     $stmt = $pdo->query("PRAGMA database_list;");
@@ -89,87 +89,87 @@ function openConnection(): PDO
     return $pdo;
 }
 
-function getTitles($offset, $limit, $title /* Define more parameters for filtering, e.g. rating, date, etc. */ )
-{
-    // WARNING! This is a slow query because it contains subqueries.
-    // It would be better implemented a separate queries specific to any given (filtering, pagination) purpose.
-    $query = "SELECT t.tconst as id, titleType as title_type, primaryTitle as primary_title, 
-                     originalTitle as original_title, isAdult as is_adult, startYear as start_year, 
-                     endYear as end_year, runtimeMinutes as runtime_minutes, t.genres, 
-                     r.averageRating as rating, r.numVotes as votes,
-                     (
-                         SELECT count(*)
-                         FROM title_director_trim d
-                         WHERE d.tconst = t.tconst
-                     ) as directors_count,
-                     (
-                         SELECT count(*)
-                         FROM title_principals_trim p
-                         WHERE p.tconst = t.tconst
-                     ) as principals_count,
-                     (
-                         SELECT count(*)
-                         FROM title_writer_trim w
-                         WHERE w.tconst = t.tconst
-                     ) as writers_count
-              FROM title_basics_trim t
-              JOIN title_ratings_trim r on r.tconst = t.tconst
-              WHERE 1 = 1 "; // This allows us to tack on filtering and sorting and limiting clauses later on.
+// function getTitles($offset, $limit, $title /* Define more parameters for filtering, e.g. rating, date, etc. */ )
+// {
+//     // WARNING! This is a slow query because it contains subqueries.
+//     // It would be better implemented a separate queries specific to any given (filtering, pagination) purpose.
+//     $query = "SELECT t.tconst as id, titleType as title_type, primaryTitle as primary_title, 
+//                      originalTitle as original_title, isAdult as is_adult, startYear as start_year, 
+//                      endYear as end_year, runtimeMinutes as runtime_minutes, t.genres, 
+//                      r.averageRating as rating, r.numVotes as votes,
+//                      (
+//                          SELECT count(*)
+//                          FROM title_director_trim d
+//                          WHERE d.tconst = t.tconst
+//                      ) as directors_count,
+//                      (
+//                          SELECT count(*)
+//                          FROM title_principals_trim p
+//                          WHERE p.tconst = t.tconst
+//                      ) as principals_count,
+//                      (
+//                          SELECT count(*)
+//                          FROM title_writer_trim w
+//                          WHERE w.tconst = t.tconst
+//                      ) as writers_count
+//               FROM title_basics_trim t
+//               JOIN title_ratings_trim r on r.tconst = t.tconst
+//               WHERE 1 = 1 "; // This allows us to tack on filtering and sorting and limiting clauses later on.
 
-    if (!empty($title)) {
-        $query .= "AND (primaryTitle LIKE :title or originalTitle LIKE :title) ";
-    }
+//     if (!empty($title)) {
+//         $query .= "AND (primaryTitle LIKE :title or originalTitle LIKE :title) ";
+//     }
 
-    $query .= "LIMIT :limit OFFSET :offset";
+//     $query .= "LIMIT :limit OFFSET :offset";
 
-    try {
-        $imdb = openConnection();
-        $stmt = $imdb->prepare($query);
+//     try {
+//         $imdb = openConnection();
+//         $stmt = $imdb->prepare($query);
 
-        if (!empty($title)) {
-            $title = "%" . $title . "%";
-            $stmt->bindParam(':title', $title, PDO::PARAM_STR);
-        }
+//         if (!empty($title)) {
+//             $title = "%" . $title . "%";
+//             $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+//         }
 
-        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        $objects = $stmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, Title::class);
-    } catch (PDOException $e) {
-        die($e->getMessage());
-    }
-    return $objects;
-}
+//         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+//         $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+//         $stmt->execute();
+//         $objects = $stmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, Title::class);
+//     } catch (PDOException $e) {
+//         die($e->getMessage());
+//     }
+//     return $objects;
+// }
 
-function getTitleCount($title)
-{
-    $query = "SELECT count(*) AS title_count
-              FROM title_basics_trim AS t
-              JOIN title_ratings_trim r on r.tconst = t.tconst
-              WHERE 1 = 1 ";
+// function getTitleCount($title)
+// {
+//     $query = "SELECT count(*) AS title_count
+//               FROM title_basics_trim AS t
+//               JOIN title_ratings_trim r on r.tconst = t.tconst
+//               WHERE 1 = 1 ";
 
-    if (!empty($title)) {
-        $query = $query . "AND (primaryTitle LIKE :title or originalTitle LIKE :title) ";
-    }
+//     if (!empty($title)) {
+//         $query = $query . "AND (primaryTitle LIKE :title or originalTitle LIKE :title) ";
+//     }
 
-    try {
-        $db = openConnection();
-        $stmt = $db->prepare($query);
+//     try {
+//         $db = openConnection();
+//         $stmt = $db->prepare($query);
 
-        if (!empty($title)) {
-            $title = "%" . $title . "%";
-            $stmt->bindParam(':title', $title, PDO::PARAM_STR);
-        }
+//         if (!empty($title)) {
+//             $title = "%" . $title . "%";
+//             $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+//         }
 
-        $stmt->execute();
-        $row = $stmt->fetch();
+//         $stmt->execute();
+//         $row = $stmt->fetch();
 
-    } catch (PDOException $e) {
-        die($e->getMessage());
-    }
+//     } catch (PDOException $e) {
+//         die($e->getMessage());
+//     }
 
-    return $row["title_count"];
-}
+//     return $row["title_count"];
+// }
 
 function getTitle($id) {
     $query = "SELECT t.tconst as id, titleType as title_type, primaryTitle as primary_title,
@@ -206,6 +206,34 @@ function getTitle($id) {
         die($e->getMessage());
     }
     return $object;
+}
+
+function getTitleCount($title, $type) {
+    $query = "SELECT COUNT(*) AS movie_count
+              FROM title_basics_trim t
+              JOIN title_ratings_trim r ON r.tconst = t.tconst
+              WHERE t.titleType = :type"; // Use :type to filter by title type
+
+    if (!empty($title)) {
+        $query .= " AND (primaryTitle LIKE :title OR originalTitle LIKE :title)";
+    }
+
+    try {
+        $db = openConnection();
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':type', $type, PDO::PARAM_STR);
+        if (!empty($title)) {
+            $search = "%" . $title . "%";
+            $stmt->bindParam(':title', $search, PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        $row = $stmt->fetch();
+    } catch (PDOException $e) {
+        die($e->getMessage());
+    }
+
+    return $row['movie_count'];
 }
 
 require_once __DIR__ . '/PosterFetcher.php'; // Or its correct path
@@ -400,6 +428,141 @@ function getMovies($offset, $limit, $title_str) { // Changed param name from $ti
     }
     return $objects; // Returns array of Title objects, or empty array on failure/no results
 }
+
+function getAll($offset, $limit, $title_str) { // Changed param name from $title to $title_str for clarity
+    $query = "SELECT t.tconst as id, 
+                    t.image_url,  /* Ensure this is selected */
+                     t.titleType as title_type, 
+                     t.primaryTitle as primary_title, 
+                     t.originalTitle as original_title, 
+                     t.isAdult as is_adult, 
+                     t.startYear as start_year, 
+                     t.endYear as end_year, 
+                     t.runtimeMinutes as runtime_minutes, /* Correct alias */
+                     t.genres as genres, /* Ensure this is selected */
+                     r.averageRating as rating, 
+                     r.numVotes as votes,
+                     (SELECT count(*) FROM title_director_trim d WHERE d.tconst = t.tconst) as directors_count,
+                     (SELECT count(*) FROM title_principals_trim p WHERE p.tconst = t.tconst) as principals_count,
+                     (SELECT count(*) FROM title_writer_trim w WHERE w.tconst = t.tconst) as writers_count
+              FROM title_basics_trim t
+              JOIN title_ratings_trim r on r.tconst = t.tconst";
+
+    $whereClauses = [];
+    if (!empty($title_str)) {
+        $whereClauses[] = "(t.primaryTitle LIKE :title_search OR t.originalTitle LIKE :title_search)";
+    }
+
+    if (!empty($whereClauses)) {
+        $query .= " WHERE " . implode(" AND ", $whereClauses);
+    }
+    $query .= " ORDER BY r.numVotes DESC, t.startYear DESC "; // Example ordering
+    $query .= " LIMIT :limit OFFSET :offset";
+
+    $objects = [];
+    try {
+        $db = openConnection();
+        $stmt = $db->prepare($query);
+        
+
+        if (!empty($title_str)) {
+            $search = "%" . $title_str . "%";
+            $stmt->bindParam(':title_search', $search, PDO::PARAM_STR);
+        }
+
+        
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $objects = $stmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, Title::class);
+        // NO PosterFetcher CALLS HERE. Title::getImageUrl() will handle it for each object when toHtml() is called.
+
+    } catch (PDOException $e) {
+        error_log("Database error in getMovies: " . $e->getMessage());
+    }
+    return $objects; // Returns array of Title objects, or empty array on failure/no results
+}
+
+function getAllCounts($title) {
+    $query = "SELECT COUNT(*) AS movie_count
+              FROM title_basics_trim t
+              JOIN title_ratings_trim r ON r.tconst = t.tconst
+              WHERE t.titleType = 'movie'";
+
+    if (!empty($title)) {
+        $query .= " AND (primaryTitle LIKE :title OR originalTitle LIKE :title)";
+    }
+
+    try {
+        $db = openConnection();
+        $stmt = $db->prepare($query);
+
+        if (!empty($title)) {
+            $search = "%" . $title . "%";
+            $stmt->bindParam(':title', $search, PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        $row = $stmt->fetch();
+    } catch (PDOException $e) {
+        die($e->getMessage());
+    }
+
+    return $row['movie_count'];
+}
+
+function getTitles($offset, $limit, $title_str, $type) { // Changed param name from $title to $title_str for clarity
+    $query = "SELECT t.tconst as id, 
+                    t.image_url,  /* Ensure this is selected */
+                     t.titleType as title_type, 
+                     t.primaryTitle as primary_title, 
+                     t.originalTitle as original_title, 
+                     t.isAdult as is_adult, 
+                     t.startYear as start_year, 
+                     t.endYear as end_year, 
+                     t.runtimeMinutes as runtime_minutes, /* Correct alias */
+                     t.genres as genres, /* Ensure this is selected */
+                     r.averageRating as rating, 
+                     r.numVotes as votes,
+                     (SELECT count(*) FROM title_director_trim d WHERE d.tconst = t.tconst) as directors_count,
+                     (SELECT count(*) FROM title_principals_trim p WHERE p.tconst = t.tconst) as principals_count,
+                     (SELECT count(*) FROM title_writer_trim w WHERE w.tconst = t.tconst) as writers_count
+              FROM title_basics_trim t
+              JOIN title_ratings_trim r on r.tconst = t.tconst
+              WHERE t.titleType = :type"; // Or other types
+
+    if (!empty($title_str)) {
+        $query .= " AND (t.primaryTitle LIKE :title_search OR t.originalTitle LIKE :title_search)";
+    }
+    $query .= " ORDER BY r.numVotes DESC, t.startYear DESC "; // Example ordering
+    $query .= " LIMIT :limit OFFSET :offset";
+
+    $objects = [];
+    try {
+        $db = openConnection();
+        $stmt = $db->prepare($query);
+        
+
+        if (!empty($title_str)) {
+            $search = "%" . $title_str . "%";
+            $stmt->bindParam(':title_search', $search, PDO::PARAM_STR);
+        }
+
+        $stmt->bindParam(':type', $type, PDO::PARAM_STR);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $objects = $stmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, Title::class);
+        // NO PosterFetcher CALLS HERE. Title::getImageUrl() will handle it for each object when toHtml() is called.
+
+    } catch (PDOException $e) {
+        error_log("Database error in getMovies: " . $e->getMessage());
+    }
+    return $objects; // Returns array of Title objects, or empty array on failure/no results
+}
+
 
 // function getMovies($offset, $limit, $title_str) {
 //     $query = "SELECT
@@ -768,8 +931,6 @@ function getShortsCount($title)
 }
 
 
-require_once './objects/Name.php'; // Create this Name class
-
 /**
  * Fetches a list of names (celebrities) with pagination and optional search.
  *
@@ -778,79 +939,172 @@ require_once './objects/Name.php'; // Create this Name class
  * @param string $search_name
  * @return Name[]
  */
-function getNamesList($offset, $limit, $search_name = "")
-{
-    $query = "SELECT n.nconst, n.primaryName, n.birthYear, n.deathYear,
-                     n.primaryProfession /* if you have this */
-              FROM name_basics_trim n
-              WHERE 1 = 1 ";
+require_once __DIR__ . '/objects/Name.php'; // Or your correct path
+require_once __DIR__ . '/PersonFetcher.php'; // Or your correct path
 
-    $params = [];
+// ... (openConnection function) ...
+
+function getNamesList($offset, $limit, $search_name = "") {
+    // SQL query to fetch main data.
+    // Column names/aliases here MUST match declared property names in the Name class
+    // (can be public or protected for PDO::FETCH_CLASS).
+    $query = "
+        SELECT
+            n.nconst,
+            n.primaryName,
+            CASE WHEN n.birthYear = '' OR n.birthYear = 0 THEN NULL ELSE n.birthYear END as birthYear,
+            CASE WHEN n.deathYear = '' OR n.deathYear = 0 THEN NULL ELSE n.deathYear END as deathYear,
+            n.primaryProfession, -- Raw pconsts string, Name class will resolve it
+            n.image_url          -- Stored image_url from DB
+        FROM
+            name_basics_trim n
+        WHERE 1 = 1
+    ";
+
+    $params = []; // Renamed from $paramsToBind for clarity in this context
 
     if (!empty($search_name)) {
-        $query .= "AND n.primaryName LIKE :search_name ";
+        $query .= " AND n.primaryName LIKE :search_name ";
         $params[':search_name'] = "%" . $search_name . "%";
     }
+    
+    $query .= " ORDER BY n.primaryName ASC ";
+    $query .= " LIMIT :limit OFFSET :offset";
 
-    // Add ordering, e.g., by name or by some popularity metric if you have one
-    $query .= "ORDER BY n.primaryName ASC ";
-    $query .= "LIMIT :limit OFFSET :offset";
+    // Add limit and offset to params *after* other params are set,
+    // as they are used directly in bindParam later.
+    // No, wait, the original loop for binding $params is fine. Let's keep that structure.
+    // The $params array will be built up and then iterated.
 
-    $params[':limit'] = $limit;
-    $params[':offset'] = $offset;
+    $finalParams = []; // For clarity, distinct from the SQL $params array that will be created by PDO
+     if (!empty($search_name)) {
+        $finalParams[':search_name'] = "%" . $search_name . "%";
+    }
+    $finalParams[':limit'] = $limit;
+    $finalParams[':offset'] = $offset;
+
 
     try {
         $db = openConnection();
         $stmt = $db->prepare($query);
-        foreach ($params as $key => &$val) {
-            $param_type = ($key === ':limit' || $key === ':offset') ? PDO::PARAM_INT : PDO::PARAM_STR;
-            $stmt->bindParam($key, $val, $param_type);
+
+        // Bind parameters
+        if (!empty($search_name)) {
+            $stmt->bindParam(':search_name', $finalParams[':search_name'], PDO::PARAM_STR);
         }
-        unset($val);
+        $stmt->bindParam(':limit', $finalParams[':limit'], PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $finalParams[':offset'], PDO::PARAM_INT);
 
         $stmt->execute();
-        $objects = $stmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, Name::class); // Use Name class
+        
+        // Fetch all rows directly as Name objects.
+        // PDO will map columns to properties.
+        // `PDO::FETCH_PROPS_LATE` calls constructor first, then sets properties.
+        $nameObjects = $stmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, Name::class);
+        
+        // $nameObjects will be an array of Name instances, or an empty array if no results.
+        // Properties like nconst, primaryName, birthYear, deathYear, primaryProfession, image_url
+        // should now be populated on each $nameObj IF they are declared in the Name class
+        // (public or protected) and their names match the SQL column names/aliases.
+
+        if ($nameObjects) {
+            foreach ($nameObjects as $nameObj) {
+                // Now, call methods on the already populated Name object
+                // to resolve/fetch additional complex data.
+                
+                // Resolve professions (pconsts string to array of names)
+                // This method uses $nameObj->primaryProfession which was set by PDO::FETCH_CLASS
+                $nameObj->resolveProfessions($db); // Pass the DB connection
+                
+                // Fetch associated titles
+                // This method uses $nameObj->nconst which was set by PDO::FETCH_CLASS
+                $nameObj->fetchAssociatedTitles($db, 3); // Pass DB and limit for titles
+
+                // The image URL ($nameObj->imageUrl) was populated by PDO::FETCH_CLASS
+                // from the n.image_url column.
+                // The logic to scrape if it's null is inside $nameObj->getImageUrl(),
+                // which is called by $nameObj->jsonSerialize() if imageUrl is still null.
+                // No explicit call to $nameObj->getImageUrl() is needed here unless you want to
+                // force scraping *before* json_encode is called later by the API.
+            }
+        }
+        
+        return $nameObjects ?: []; // Return the array of (potentially enriched) Name objects or empty array
+
     } catch (PDOException $e) {
-        error_log("Error in getNamesList: " . $e->getMessage());
-        return [];
+        error_log("Error in getNamesList (FETCH_CLASS version): " . $e->getMessage() . " Query: " . $query . " Params: " . print_r($finalParams, true));
+        return []; // Return empty array on error
     }
-    return $objects ?: [];
 }
 
+// getNamesCount function (ensure it aligns with any new mandatory filters in getNamesList)
+function getNamesCount($search_name = "") {
+    $query = "SELECT count(*) AS name_count
+              FROM name_basics_trim n
+              WHERE 1 = 1 ";
+    // Note: if getNamesList adds mandatory filters (e.g., birthYear IS NOT NULL),
+    // getNamesCount must also include them for an accurate total.
+
+    if (!empty($search_name)) {
+        $query .= "AND n.primaryName LIKE :search_name ";
+    }
+
+    // Example: if birthYear is required
+    // if (isset($_GET['requireBirthYear']) && $_GET['requireBirthYear'] == '1') {
+    //     $query .= "AND n.birthYear IS NOT NULL ";
+    // }
+
+    try {
+        $db = openConnection();
+        $stmt = $db->prepare($query);
+
+        if (!empty($search_name)) {
+            $searchTerm = "%" . $search_name . "%";
+            $stmt->bindParam(':search_name', $searchTerm, PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ? (int)$row["name_count"] : 0;
+    } catch (PDOException $e) {
+        error_log("Error in getNamesCount: " . $e->getMessage());
+        return 0;
+    }
+}
 /**
  * Gets the count of names (celebrities) based on search term.
  *
  * @param string $search_name
  * @return int
  */
-function getNamesCount($search_name = "")
-{
-    $query = "SELECT count(*) AS name_count
-              FROM name_basics_trim n
-              WHERE 1 = 1 ";
-    $params = [];
+// function getNamesCount($search_name = "")
+// {
+//     $query = "SELECT count(*) AS name_count
+//               FROM name_basics_trim n
+//               WHERE 1 = 1 ";
+//     $params = [];
 
-    if (!empty($search_name)) {
-        $query .= "AND n.primaryName LIKE :search_name ";
-        $params[':search_name'] = "%" . $search_name . "%";
-    }
+//     if (!empty($search_name)) {
+//         $query .= "AND n.primaryName LIKE :search_name ";
+//         $params[':search_name'] = "%" . $search_name . "%";
+//     }
 
-    try {
-        $db = openConnection();
-        $stmt = $db->prepare($query);
-        foreach ($params as $key => &$val) {
-            $stmt->bindParam($key, $val, PDO::PARAM_STR);
-        }
-        unset($val);
+//     try {
+//         $db = openConnection();
+//         $stmt = $db->prepare($query);
+//         foreach ($params as $key => &$val) {
+//             $stmt->bindParam($key, $val, PDO::PARAM_STR);
+//         }
+//         unset($val);
 
-        $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        error_log("Error in getNamesCount: " . $e->getMessage());
-        return 0;
-    }
-    return $row ? (int)$row["name_count"] : 0;
-}
+//         $stmt->execute();
+//         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+//     } catch (PDOException $e) {
+//         error_log("Error in getNamesCount: " . $e->getMessage());
+//         return 0;
+//     }
+//     return $row ? (int)$row["name_count"] : 0;
+// }
 
 /**
  * Fetches a single name (celebrity) by their nconst ID.
