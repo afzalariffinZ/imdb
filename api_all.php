@@ -4,7 +4,7 @@
 ob_start(); // Start output buffering for better error/header control
 
 // CORS Headers - Adjust http://localhost:5173 to your React app's actual origin
-header("Access-Control-Allow-Origin: http://localhost:5173"); // Be specific in production
+header("Access-Control-Allow-Origin: *"); // Be specific in production
 header("Access-Control-Allow-Credentials: true"); // If you use cookies/sessions
 header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");

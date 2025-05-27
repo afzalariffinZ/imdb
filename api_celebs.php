@@ -87,7 +87,7 @@ http_response_code($httpStatusCode);
 header("Content-Type: application/json; charset=UTF-8");
 
 // CORS Headers - Adjust http://localhost:5173 to your React app's actual origin
-header("Access-Control-Allow-Origin: http://localhost:5173"); // Be specific in production
+header("Access-Control-Allow-Origin: *"); // Be specific in production
 header("Access-Control-Allow-Credentials: true"); // If you use cookies/sessions
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS"); // Add POST if you use it
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
